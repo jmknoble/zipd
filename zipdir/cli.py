@@ -1,4 +1,4 @@
-"""Command-line interface for zipdir"""
+"""Command-line interface for zipdir."""
 
 from __future__ import absolute_import, print_function
 
@@ -12,7 +12,6 @@ import gitignore_parser
 
 import zipdir.argparsing as argparsing
 import zipdir.runcommand as runcommand
-import zipdir.util as util
 from zipdir import get_version
 
 DESCRIPTION_TEMPLATE = """
@@ -123,7 +122,7 @@ def _dir_exists(path, should_raise=False):
         if should_raise:
             raise FileNotFoundError("path not found: {path}".format(path=path))
         return False
-    elif not os.path.isdir(path):
+    if not os.path.isdir(path):
         if should_raise:
             raise NotADirectoryError("not a directory: {path}".format(path=path))
         return False
@@ -135,19 +134,18 @@ def _file_exists(path, should_raise=False):
         if should_raise:
             raise FileNotFoundError("path not found: {path}".format(path=path))
         return False
-    elif not os.path.isfile(path):
+    if not os.path.isfile(path):
         if should_raise:
             message = "not a regular file: {path}".format(path=path)
             if os.path.isdir(path):
                 raise IsADirectoryError(message)
-            else:
-                raise IOError(message)
+            raise IOError(message)
         return False
     return True
 
 
 def _is_root_dir(path):
-    return (os.path.realpath(path) in {os.path.sep, "/"})
+    return os.path.realpath(path) in {os.path.sep, "/"}
 
 
 def _handle_root_dir(path, force):
@@ -155,7 +153,10 @@ def _handle_root_dir(path, force):
         zipfile_path = "".join(["ROOT_DIRECTORY", ZIP_SUFFIX])
     else:
         raise RuntimeError(
-            "To zip up {path} and all its subdirectories, use the '--force' option"
+            (
+                "To zip up {path} and all its subdirectories, "
+                "use the '--force' option"
+            ).format(path=path)
         )
     return zipfile_path
 
@@ -176,7 +177,7 @@ def _remove_file(path, dry_run, show_trace=True):
     if dry_run:
         runcommand.print_message("Would do:", dry_run=dry_run)
     if dry_run or show_trace:
-        runcommand.print_trace(["rm", "-f",  path], dry_run=dry_run)
+        runcommand.print_trace(["rm", "-f", path], dry_run=dry_run)
     if not dry_run:
         os.remove(path)
 
@@ -225,10 +226,20 @@ def _find_paths(path, include, sort=True):
             check_ignore = gitignore_parser.parse_gitignore(gitignore_path)
     for (root, dirs, files) in os.walk(path, topdown=True, followlinks=False):
         paths.extend(
-            [os.path.join(root, x) for x in _filter_paths(root, dirs, include=include, check_ignore=check_ignore)]
+            [
+                os.path.join(root, x)
+                for x in _filter_paths(
+                    root, dirs, include=include, check_ignore=check_ignore
+                )
+            ]
         )
         paths.extend(
-            [os.path.join(root, x) for x in _filter_paths(root, files, include=include, check_ignore=check_ignore)]
+            [
+                os.path.join(root, x)
+                for x in _filter_paths(
+                    root, files, include=include, check_ignore=check_ignore
+                )
+            ]
         )
     if sort:
         paths.sort()
@@ -239,7 +250,7 @@ def _grok_extra_args(extra_args):
     return extra_args[1:] if (extra_args and extra_args[0] == "--") else extra_args
 
 
-def _run_with_piped_input(input, command, dry_run, show_trace):
+def _run_with_piped_input(input_data, command, dry_run, show_trace):
     if dry_run:
         runcommand.print_message("Would run:", dry_run=dry_run)
     if dry_run or show_trace:
@@ -247,7 +258,7 @@ def _run_with_piped_input(input, command, dry_run, show_trace):
     if dry_run:
         return 0
     process = subprocess.Popen(command, universal_newlines=True, stdin=subprocess.PIPE)
-    process.communicate(input=input)
+    process.communicate(input=input_data)
     status = process.wait()
     return status
 
@@ -271,7 +282,9 @@ def _do_zip(
             folder_path,
         ]
         zip_command.extend(more_options)
-        status = runcommand.run_command(zip_command, check=False, dry_run=dry_run, show_trace=True)
+        status = runcommand.run_command(
+            zip_command, check=False, dry_run=dry_run, show_trace=True
+        )
     else:
         zip_command = [
             ZIP_COMMAND,
@@ -282,7 +295,9 @@ def _do_zip(
 
         paths = _find_paths(folder_path, include)
 
-        status = _run_with_piped_input("\n".join(paths), zip_command, dry_run, show_trace=True)
+        status = _run_with_piped_input(
+            "\n".join(paths), zip_command, dry_run, show_trace=True
+        )
 
     return status
 
