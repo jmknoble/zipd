@@ -85,7 +85,7 @@ def run_command(
         return_output
             (optional) If `True`-ish, return the output from the command (uses
             `subprocess.check_output()`:py:meth: with
-            ``universal_newlines``=`True`)
+            ``universal_newlines=True``)
 
         show_trace
             (optional) If `True`-ish, print a trace of the command right before
@@ -102,7 +102,7 @@ def run_command(
     :Returns:
         - If `dry_run` is `True`, returns `None` if `return_output` is `True`,
           or 0 if `return_output` is `False`; otherwise,
-        - If `return_output` is `True, returns the result of
+        - If `return_output` is `True`, returns the result of
           `subprocess.check_output()`:py:meth:; otherwise,
         - If `check` is `True`, returns the result of
           `subprocess.check_call()`:py:meth:; otherwise,
