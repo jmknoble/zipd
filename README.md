@@ -1,14 +1,14 @@
 # zipdir
 
-Recursively zip up a directory/folder.
+Convenience utility for recursively zipping up a directory (or "folder").
 
 
 ## Features
 
-- Can filters revision control files out of resulting zipfile.
+- Can filter some revision control files out of resulting zipfile.
 - Can use `.gitignore` file for filtering.
 - Can zip up a git workspace including the `.git` folder.
-- Can make a fresh zipfile or reuse existing one.
+- Can make a fresh zipfile or reuse an existing one.
 - Can pass options to **zip**.
 - Dry run.
 
