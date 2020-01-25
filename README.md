@@ -1,14 +1,44 @@
 # zipdir
 
-Recursively zip up a directory/folder
+Recursively zip up a directory/folder.
+
+
+## Features
+
+- Can filters revision control files out of resulting zipfile.
+- Can use `.gitignore` file for filtering.
+- Can zip up a git workspace including the `.git` folder.
+- Can make a fresh zipfile or reuse existing one.
+- Can pass options to **zip**.
+- Dry run.
 
 
 ## Requirements
 
 - A [Python](https://www.python.org/) interpreter, version 3.6 or later
-- _(List requirements here)_
+- The Python packages listed in [requirements.txt][]
+- [zip][] installed somewhere on your path
+
+
+## Installing
+
+1. Create and activate your Python virtual environment.
+2.  Install requirements via `pip`:
+
+        pip install -r requirements.txt
+
+3.  Install **zipdir** via `setup.py`:
+
+        python setup.py install
 
 
 ## References
 
-- _(List references here)_
+- [zip][]
+- [gitignore-parser][]
+
+
+ [gitignore-parser]: https://github.com/mherrmann/gitignore_parser
+ [python]: https://www.python.org/
+ [requirements.txt]: requirements.txt
+ [zip]: https://infozip.sourceforge.io/Zip.html
