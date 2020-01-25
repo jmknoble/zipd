@@ -18,7 +18,7 @@ DESCRIPTION_TEMPLATE = """
 Recursively zip up a directory/folder into a zipfile.
 
 The resulting zipfile will be named FOLDER.zip and placed in the current
-directory.  This uses the 'zip' command to perform most of its work.
+directory.  This uses the 'zip' command to perform much of its work.
 """
 
 EPILOG_TEMPLATE = """
@@ -29,52 +29,109 @@ from the zip archive:
     {prog} my-folder -- -D
 """
 
+FILTER_INCLUDE_ALL = "all"
+FILTER_INCLUDE_SOME = "some"
+FILTER_INCLUDE_GITIGNORE = "gitignore"
+FILTER_INCLUDE_GIT = "git"
+FILTER_INCLUDE_DEFAULT = FILTER_INCLUDE_SOME
+FILTER_INCLUDES_USING_GITIGNORE = {FILTER_INCLUDE_GIT, FILTER_INCLUDE_GITIGNORE}
+
+CREATE_METHOD_BACKUP = "backup"
+CREATE_METHOD_KEEP = "keep"
+CREATE_METHOD_OVERWRITE = "overwrite"
+CREATE_METHOD_DEFAULT = CREATE_METHOD_BACKUP
+
 ZIP_COMMAND = "zip"
 ZIP_SUFFIX = ".zip"
+
 BACKUP_SUFFIX = ".old" if sys.platform.startswith("win") else "~"
-FILTER_PATHS_SOME = {".cvs", ".svn"}
+
+FILTER_PATHS_SOME = {".cvs", ".svn", ".git"}
 FILTER_PATHS_GITIGNORE = {".git"}
 
 
+def _is_root_dir(path):
+    return os.path.realpath(path) in {os.path.sep, "/"}
+
+
+def _handle_root_dir(path, force):
+    if force:
+        zipfile_path = "".join(["ROOT_DIRECTORY", ZIP_SUFFIX])
+    else:
+        raise RuntimeError(
+            (
+                "To zip up {path} and all its subdirectories, "
+                "use the '--force' option"
+            ).format(path=path)
+        )
+    return zipfile_path
+
+
+def _infer_zipfile_path(path, force):
+    if _is_root_dir(path):
+        zipfile_path = _handle_root_dir(path, force)
+    else:
+        zipfile_path = os.path.basename(path) + ZIP_SUFFIX
+    zipfile_path = os.path.join(os.path.curdir, zipfile_path)
+    return zipfile_path
+
+
+def _infer_backup_path(path):
+    return "".join([path, BACKUP_SUFFIX])
+
+
 def _add_arguments(argparser):
-    group_include = argparser.add_mutually_exclusive_group()
-    group_include.add_argument(
+    group_filtering = argparser.add_argument_group(title="filtering arguments")
+    mutex_group_include = group_filtering.add_mutually_exclusive_group()
+    mutex_group_include.add_argument(
         "-a",
         "--all",
         dest="include",
         action="store_const",
-        const="all",
-        default="some",
+        const=FILTER_INCLUDE_ALL,
+        default=FILTER_INCLUDE_DEFAULT,
         help=(
-            "By default, some things used by revision control systems "
-            "are excluded from the resulting zipfile; to include them "
-            "anyway, use this option."
+            "Include all files/folders in the resulting zipfile "
+            "(default: exclude some folders used by revision control systems "
+            "such as Git, Subversion, or CVS)."
         ),
     )
-    group_include.add_argument(
+    mutex_group_include.add_argument(
         "-g",
         "--gitignore",
         dest="include",
         action="store_const",
-        const="gitignore",
+        const=FILTER_INCLUDE_GITIGNORE,
         help=(
-            "If a .gitignore file exists in FOLDER, use it to determine "
-            "what to include or exclude from the resulting zipfile."
+            "If a '.gitignore' file exists in FOLDER, use it to determine "
+            "what to include in or exclude from the resulting zipfile "
+            "(if a '.git' folder exists, it will be excluded)."
         ),
     )
-    group_include.add_argument(
+    mutex_group_include.add_argument(
         "-G",
         "--git",
         dest="include",
         action="store_const",
-        const="git",
+        const=FILTER_INCLUDE_GIT,
         help=(
-            "If a .git file exists in FOLDER, include it in the resulting "
-            "zipfile, in addition to using an existing .gitignore file as "
-            "with the '--gitignore' option."
+            "Like '--gitignore', but if a '.git' folder exists in FOLDER, "
+            "include it in the resulting zipfile as well."
         ),
     )
-    argparser.add_argument(
+    group_zipfile = argparser.add_argument_group(title="zipfile arguments")
+    group_zipfile.add_argument(
+        "-o",
+        "--output",
+        dest="output",
+        metavar="ZIPFILE",
+        action="store",
+        default=None,
+        help=(
+            "Store the resulting zip archive in ZIPFILE (default: {default})."
+        ).format(default=_infer_zipfile_path("FOLDER", force=False)),
+    )
+    group_zipfile.add_argument(
         "-f",
         "--force",
         dest="force",
@@ -82,15 +139,29 @@ def _add_arguments(argparser):
         default=False,
         help="if FOLDER is '/', go ahead and zip it up anyway.",
     )
-    argparser.add_argument(
+    mutex_group_create_method = group_zipfile.add_mutually_exclusive_group()
+    mutex_group_create_method.add_argument(
         "-k",
         "--keep",
-        dest="keep",
-        action="store_true",
-        default=False,
+        dest="create_method",
+        action="store_const",
+        const=CREATE_METHOD_KEEP,
+        default=CREATE_METHOD_DEFAULT,
         help=(
-            "By default, the resulting zipfile is replaced if it already "
-            "exists; to keep a preexisting one, use this option."
+            "Keep and reuse a preexisting zipfile "
+            "(default: backup a preexisting zipfile "
+            "and create a fresh one)."
+        ),
+    )
+    mutex_group_create_method.add_argument(
+        "--overwrite",
+        dest="create_method",
+        action="store_const",
+        const=CREATE_METHOD_OVERWRITE,
+        help=(
+            "Remove and overwrite a preexisting zipfile "
+            "(default: backup a preexisting zipfile "
+            "and create a fresh one)."
         ),
     )
     argparsing.add_dry_run_argument(argparser)
@@ -144,35 +215,6 @@ def _file_exists(path, should_raise=False):
     return True
 
 
-def _is_root_dir(path):
-    return os.path.realpath(path) in {os.path.sep, "/"}
-
-
-def _handle_root_dir(path, force):
-    if force:
-        zipfile_path = "".join(["ROOT_DIRECTORY", ZIP_SUFFIX])
-    else:
-        raise RuntimeError(
-            (
-                "To zip up {path} and all its subdirectories, "
-                "use the '--force' option"
-            ).format(path=path)
-        )
-    return zipfile_path
-
-
-def _infer_zipfile_path(path, force):
-    if _is_root_dir(path):
-        zipfile_path = _handle_root_dir(path, force)
-    else:
-        zipfile_path = os.path.basename(path) + ZIP_SUFFIX
-    return zipfile_path
-
-
-def _infer_backup_path(path):
-    return "".join([path, BACKUP_SUFFIX])
-
-
 def _remove_file(path, dry_run, show_trace=True):
     if dry_run:
         runcommand.print_message("Would do:", dry_run=dry_run)
@@ -199,15 +241,20 @@ def _backup_existing(path, dry_run):
         _rename(path, backup_path, dry_run=dry_run)
 
 
+def _remove_existing(path, dry_run):
+    if _file_exists(path):
+        _remove_file(path, dry_run=dry_run)
+
+
 def _filter_paths(root, paths, include, check_ignore=None):
     include = "some" if include is None else include
-    if include == "all":
+    if include == FILTER_INCLUDE_ALL:
         pass
-    elif include == "some":
+    elif include == FILTER_INCLUDE_SOME:
         for (i, path) in enumerate(paths):
             if path in FILTER_PATHS_SOME:
                 del paths[i]
-    elif include in {"git", "gitignore"}:
+    elif include in FILTER_INCLUDES_USING_GITIGNORE:
         for (i, path) in enumerate(paths):
             abspath = os.path.abspath(os.path.join(root, path))
             if check_ignore is not None and check_ignore(abspath):
@@ -220,7 +267,7 @@ def _filter_paths(root, paths, include, check_ignore=None):
 def _find_paths(path, include, sort=True):
     paths = [path]
     check_ignore = None
-    if include in {"git", "gitignore"}:
+    if include in FILTER_INCLUDES_USING_GITIGNORE:
         gitignore_path = os.path.join(os.path.abspath(path), ".gitignore")
         if _file_exists(gitignore_path):
             check_ignore = gitignore_parser.parse_gitignore(gitignore_path)
@@ -264,17 +311,26 @@ def _run_with_piped_input(input_data, command, dry_run, show_trace):
 
 
 def _do_zip(
-    folder_path, include=None, force=False, keep=False, dry_run=False, more_options=None
+    folder_path,
+    zipfile_path,
+    include=None,
+    force=False,
+    create_method=None,
+    dry_run=False,
+    more_options=None,
 ):
     folder_path = _normalize_path(folder_path)
     _dir_exists(folder_path, should_raise=True)
-    zipfile_path = _infer_zipfile_path(folder_path, force=force)
+    if zipfile_path is None:
+        zipfile_path = _infer_zipfile_path(folder_path, force=force)
     more_options = _grok_extra_args(more_options)
 
-    if not keep:
+    if create_method == CREATE_METHOD_BACKUP:
         _backup_existing(zipfile_path, dry_run=dry_run)
+    elif create_method == CREATE_METHOD_OVERWRITE:
+        _remove_existing(zipfile_path, dry_run=dry_run)
 
-    if include == "all":
+    if include == FILTER_INCLUDE_ALL:
         zip_command = [
             ZIP_COMMAND,
             "-r",
@@ -307,7 +363,7 @@ def main(*argv):
     Do the CLI things.
 
     :Args:
-        *argv
+        argv
             Zero or more arguments, beginning with the program name (like
             `sys.argv`:py:attr:)
 
@@ -334,9 +390,10 @@ def main(*argv):
 
     status = _do_zip(
         args.folder,
+        args.output,
         include=args.include,
         force=args.force,
-        keep=args.keep,
+        create_method=args.create_method,
         dry_run=args.dry_run,
         more_options=args.more_options,
     )
