@@ -56,7 +56,7 @@ SCRIPTS = []
 PACKAGE_DATA = {"": ["*.config", "*.json", "*.cfg"]}
 
 REQUIREMENTS = [
-    'gitignore-parser >= 0.0.5',
+    "gitignore-parser >= 0.0.5",
 ]
 
 TEST_SUITE = "tests"
