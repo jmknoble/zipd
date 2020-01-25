@@ -218,7 +218,7 @@ def _filter_paths(root, paths, include, check_ignore=None):
 
 
 def _find_paths(path, include, sort=True):
-    paths = []
+    paths = [path]
     check_ignore = None
     if include in {"git", "gitignore"}:
         gitignore_path = os.path.join(os.path.abspath(path), ".gitignore")
