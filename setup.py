@@ -18,6 +18,7 @@ import sys
 ####################
 
 NAME = "zipdir"
+SCRIPT_NAME = "zipdir"
 DESCRIPTION = "Recursively zip up a directory/folder"
 
 with open(os.path.join(os.path.dirname(__file__), "VERSION")) as version_file:
@@ -54,7 +55,9 @@ SCRIPTS = []
 
 PACKAGE_DATA = {"": ["*.config", "*.json", "*.cfg"]}
 
-REQUIREMENTS = []
+REQUIREMENTS = [
+    'gitignore-parser >= 0.0.5',
+]
 
 TEST_SUITE = "tests"
 TEST_REQUIREMENTS = []
@@ -169,11 +172,13 @@ setup(
     scripts=SCRIPTS,
     package_data=PACKAGE_DATA,
     # package_dir={NAME: NAME},
-    # entry_points={
-    #         'console_scripts': [
-    #                 '{name}={name}.cli:main'.format(name=NAME),
-    #                 ]
-    #         },
+    entry_points={
+        "console_scripts": [
+            "{script_name}={name}.__main__:main".format(
+                name=NAME, script_name=SCRIPT_NAME
+            )
+        ]
+    },
     include_package_data=True,
     provides=PROVIDES,
     install_requires=REQUIREMENTS,
