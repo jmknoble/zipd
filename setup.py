@@ -18,8 +18,11 @@ import sys
 ####################
 
 NAME = "zipdir"
-SCRIPT_NAME = "zipdir"
 DESCRIPTION = "Recursively zip up a directory/folder"
+
+SCRIPT_NAMES = ["zipdir"]
+SCRIPT_ALIASES = {"zipdir": ["zipd"]}
+SCRIPT_ENTRY_POINTS = {}
 
 with open(os.path.join(os.path.dirname(__file__), "VERSION")) as version_file:
     VERSION = version_file.read().strip()
@@ -84,12 +87,59 @@ CLASSIFIERS = [
 
 ####################
 
+if README_FILENAME.endswith(".md"):
+    README_CONTENT_TYPE = "text/markdown"
+elif README_FILENAME.endswith(".rst"):
+    README_CONTENT_TYPE = "text/x-rst"
+else:
+    README_CONTENT_TYPE = "text/plain"
+
 readme_path = os.path.join(os.path.dirname(__file__), README_FILENAME)
 if os.path.exists(readme_path):
     with open(readme_path, "r") as readme_file:
         README = readme_file.read()
 else:
     README = None
+
+####################
+
+
+def default_entry_point(name):
+    return "{name}.__main__:main".format(name=name)
+
+
+def scripts_for_entry_point(name, script_name, entry_point=None, aliases=None):
+    if entry_point is None:
+        entry_point = default_entry_point(name)
+    if aliases is None:
+        aliases = []
+    return [
+        "{x}={entry_point}".format(x=x, entry_point=entry_point)
+        for x in [script_name] + aliases
+    ]
+
+
+def list_scripts(name, script_names, entry_points=None, script_aliases=None):
+    if entry_points is None:
+        entry_points = {}
+    if script_aliases is None:
+        script_aliases = {}
+
+    scripts = []
+
+    for script_name in script_names:
+        entry_point = entry_points.get(script_name, None)
+        aliases = script_aliases.get(script_name, None)
+        scripts.extend(
+            scripts_for_entry_point(
+                name=name,
+                script_name=script_name,
+                entry_point=entry_point,
+                aliases=aliases,
+            )
+        )
+    return scripts
+
 
 ####################
 
@@ -163,6 +213,7 @@ setup(
     version=VERSION,
     description=DESCRIPTION,
     long_description=README,
+    long_description_content_type=README_CONTENT_TYPE,
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
     maintainer=MAINTAINER,
@@ -173,11 +224,12 @@ setup(
     package_data=PACKAGE_DATA,
     # package_dir={NAME: NAME},
     entry_points={
-        "console_scripts": [
-            "{script_name}={name}.__main__:main".format(
-                name=NAME, script_name=SCRIPT_NAME
-            )
-        ]
+        "console_scripts": list_scripts(
+            name=NAME,
+            script_names=SCRIPT_NAMES,
+            entry_points=SCRIPT_ENTRY_POINTS,
+            script_aliases=SCRIPT_ALIASES,
+        )
     },
     include_package_data=True,
     provides=PROVIDES,
