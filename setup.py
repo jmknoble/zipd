@@ -20,10 +20,6 @@ import sys
 NAME = "zipdir"
 DESCRIPTION = "Recursively zip up a directory/folder"
 
-SCRIPT_NAMES = ["zipdir"]
-SCRIPT_ALIASES = {"zipdir": ["zipd"]}
-SCRIPT_ENTRY_POINTS = {}
-
 with open(os.path.join(os.path.dirname(__file__), "VERSION")) as version_file:
     VERSION = version_file.read().strip()
 
@@ -54,7 +50,13 @@ PACKAGES = find_packages(include=PACKAGE_INCLUDES, exclude=PACKAGE_EXCLUDES)
 
 PROVIDES = PACKAGES
 
+# Pre-written scripts
 SCRIPTS = []
+
+# Auto-generated scripts with entry points
+SCRIPT_NAMES = ["zipdir"]
+SCRIPT_ALIASES = {"zipdir": ["zipd"]}
+SCRIPT_ENTRY_POINTS = {}
 
 PACKAGE_DATA = {"": ["*.config", "*.json", "*.cfg"]}
 
@@ -105,10 +107,12 @@ else:
 
 
 def default_entry_point(name):
+    """Generate a default entry point for package `name`."""
     return "{name}.__main__:main".format(name=name)
 
 
 def scripts_for_entry_point(name, script_name, entry_point=None, aliases=None):
+    """Return a list of one or more scripts referring to `entry_point`"""
     if entry_point is None:
         entry_point = default_entry_point(name)
     if aliases is None:
@@ -120,6 +124,70 @@ def scripts_for_entry_point(name, script_name, entry_point=None, aliases=None):
 
 
 def list_scripts(name, script_names, entry_points=None, script_aliases=None):
+    """
+    Generate a list of scripts and entry points.
+
+    This is intended for use with ``setup(entry_points={...})``.
+
+    :Args:
+        name
+            The name of the package the script is for (used to generate a
+            default entry point).
+
+        script_names
+            An iterable containing zero or more names of distinct "canonical"
+            scripts to generate.
+
+        entry_points
+            A `dict`-ish mapping script names to entry points::
+
+                { "{script_name}": "{package}.{module}:{callable}" }
+
+            Example::
+
+                { "script1": "package1.__main__:main" }
+
+            If no mapping appears here for a given script name, a default entry
+            point is assumed for that script name.
+
+            If `None` is supplied, a default entry point is assumed for every
+            script name.
+
+        script_aliases
+            A `dict`-ish mapping script names to lists of zero or more
+            aliases::
+
+                { "{script_name}": ["{alias}", ...] }
+
+            Example::
+
+                { "script1": ["script1-alias"], "script2": [] }
+
+            Each alias becomes a separate script with the same entry point as
+            the "canonical" script.
+
+            If `None` is supplied, no alias scripts will be generated.
+
+    :Returns:
+        A list of zero or more scripts and entry points::
+
+            [ "{script_name}={package}.{module}:{callable}", ... ]
+
+    :Raises:
+        - `AttributeError`:py:exc: if `entry_points` or `script_aliases` is not
+          a `dict`-ish.
+        - `TypeError`:py:exc: if `script_name` is not an iterable.
+
+    :Example:
+        Tell `setup()`:py:func: to generate a console script with the same name
+        as the package, with the default entry point and no aliases:
+
+        >>> setup(...,
+        >>>     entry_points={
+        >>>         "console_scripts": list_scripts("packagename", ["packagename"])
+        >>>     },
+        >>> )
+    """
     if entry_points is None:
         entry_points = {}
     if script_aliases is None:
