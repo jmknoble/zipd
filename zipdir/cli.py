@@ -248,19 +248,25 @@ def _remove_existing(path, dry_run):
 
 def _filter_paths(root, paths, include, check_ignore=None):
     include = "some" if include is None else include
+    items_to_delete = []
+
     if include == FILTER_INCLUDE_ALL:
         pass
     elif include == FILTER_INCLUDE_SOME:
         for (i, path) in enumerate(paths):
             if path in FILTER_PATHS_SOME:
-                del paths[i]
+                items_to_delete.append(i)
     elif include in FILTER_INCLUDES_USING_GITIGNORE:
         for (i, path) in enumerate(paths):
             abspath = os.path.abspath(os.path.join(root, path))
             if check_ignore is not None and check_ignore(abspath):
-                del paths[i]
+                items_to_delete.append(i)
             elif include == "gitignore" and path in FILTER_PATHS_GITIGNORE:
-                del paths[i]
+                items_to_delete.append(i)
+
+    for i in reversed(items_to_delete):
+        del paths[i]
+
     return paths
 
 
