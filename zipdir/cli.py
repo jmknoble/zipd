@@ -10,9 +10,7 @@ import sys
 
 import gitignore_parser
 
-import zipdir.argparsing as argparsing
-import zipdir.runcommand as runcommand
-from zipdir import get_version
+from zipdir import argparsing, get_version, runcommand
 
 DESCRIPTION_TEMPLATE = """
 Recursively zip up a directory/folder into a zipfile.
@@ -48,6 +46,8 @@ BACKUP_SUFFIX = ".old" if sys.platform.startswith("win") else "~"
 
 FILTER_PATHS_SOME = {".cvs", ".svn", ".git"}
 FILTER_PATHS_GITIGNORE = {".git"}
+
+GITIGNORE_BASENAME = ".gitignore"
 
 
 def _is_root_dir(path):
@@ -103,10 +103,10 @@ def _add_arguments(argparser):
         action="store_const",
         const=FILTER_INCLUDE_GITIGNORE,
         help=(
-            "If a '.gitignore' file exists in FOLDER, use it to determine "
+            "If a '{gitignore}' file exists in FOLDER, use it to determine "
             "what to include in or exclude from the resulting zipfile "
             "(if a '.git' folder exists, it will be excluded)."
-        ),
+        ).format(gitignore=GITIGNORE_BASENAME),
     )
     mutex_group_include.add_argument(
         "-G",
@@ -247,7 +247,7 @@ def _remove_existing(path, dry_run):
 
 
 def _filter_paths(root, paths, include, check_ignore=None):
-    include = "some" if include is None else include
+    include = FILTER_INCLUDE_SOME if include is None else include
     items_to_delete = []
 
     if include == FILTER_INCLUDE_ALL:
@@ -261,7 +261,7 @@ def _filter_paths(root, paths, include, check_ignore=None):
             abspath = os.path.abspath(os.path.join(root, path))
             if check_ignore is not None and check_ignore(abspath):
                 items_to_delete.append(i)
-            elif include == "gitignore" and path in FILTER_PATHS_GITIGNORE:
+            elif include == FILTER_INCLUDE_GITIGNORE and path in FILTER_PATHS_GITIGNORE:
                 items_to_delete.append(i)
 
     for i in reversed(items_to_delete):
@@ -274,7 +274,7 @@ def _find_paths(path, include, sort=True):
     paths = [path]
     check_ignore = None
     if include in FILTER_INCLUDES_USING_GITIGNORE:
-        gitignore_path = os.path.join(os.path.abspath(path), ".gitignore")
+        gitignore_path = os.path.join(os.path.abspath(path), GITIGNORE_BASENAME)
         if _file_exists(gitignore_path):
             check_ignore = gitignore_parser.parse_gitignore(gitignore_path)
     for (root, dirs, files) in os.walk(path, topdown=True, followlinks=False):
