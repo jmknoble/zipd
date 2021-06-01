@@ -3,7 +3,7 @@
 # https://packaging.python.org/distributing/#setup-py
 
 try:
-    from setuptools import setup, find_packages
+    from setuptools import find_packages, setup
 except ImportError as e:
     error_message = "Unable to find setuptools;"
     error_message += (
@@ -55,19 +55,40 @@ SCRIPTS = []
 
 # Auto-generated scripts with entry points
 SCRIPT_NAMES = ["zipdir"]
+# or: SCRIPT_NAMES = ["zipdir"]
+
 SCRIPT_ALIASES = {"zipdir": ["zipd"]}
+# or: SCRIPT_ALIASES = {"zipdir": ["alias"]}
+
 SCRIPT_ENTRY_POINTS = {}
+# or: SCRIPT_ENTRY_POINTS = {
+#     "zipdir": "zipdir.__main__:main",
+# }
 
 PACKAGE_DATA = {"": ["*.config", "*.json", "*.cfg"]}
 
-REQUIREMENTS = [
-    "gitignore-parser >= 0.0.5",
-]
+SETUP_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+def get_requirements_from_file(dirname, basename, default=None):
+    reqs_path = os.path.join(dirname, basename)
+    if os.path.isfile(reqs_path):
+        with open(reqs_path) as f:
+            return [x.strip() for x in f if not x.strip().startswith("#")]
+    else:
+        return [] if default is None else default
+
+
+REQUIREMENTS = get_requirements_from_file(SETUP_DIR, "requirements.txt")
+DEV_DIR = "dev"
+TEST_REQUIREMENTS = get_requirements_from_file(
+    SETUP_DIR, os.path.join(DEV_DIR, "requirements_test.txt")
+)
+SETUP_REQUIREMENTS = get_requirements_from_file(
+    SETUP_DIR, os.path.join(DEV_DIR, "requirements_dev.txt")
+)
 
 TEST_SUITE = "tests"
-TEST_REQUIREMENTS = []
-
-SETUP_REQUIREMENTS = ["Sphinx"]
 
 KEYWORDS = "zip cli"
 CLASSIFIERS = [
@@ -83,6 +104,8 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Topic :: System :: Distributed Computing",
     "Topic :: Utilities",
 ]
