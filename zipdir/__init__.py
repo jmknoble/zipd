@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 __author__ = 'Jim Knoble'
 __email__ = 'jmknoble@pobox.com'
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 # fmt: on
 
