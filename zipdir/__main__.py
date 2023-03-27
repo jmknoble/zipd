@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import sys
 
-import zipdir.cli as cli
+from zipdir import cli
 
 
 def main():

@@ -2,16 +2,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Imports, if any
-
-# fmt: off
-
-__author__ = 'Jim Knoble'
-__email__ = 'jmknoble@pobox.com'
-__version__ = '0.3.4'
-
-# fmt: on
+__version__ = "0.3.4"
 
 
-def get_version():
-    return __version__
+def get_version(thing=None):
+    if thing is None:
+        return __version__
+    return "{thing} v{version}".format(thing=thing, version=__version__)

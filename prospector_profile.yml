@@ -25,6 +25,8 @@ pylint:
     - logging-format-interpolation
     - len-as-condition
     - logging-fstring-interpolation
+    - consider-using-f-string
+    - raise-missing-from
   options:
     max-args: 10
     max-locals: 15

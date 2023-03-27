@@ -253,11 +253,11 @@ def _filter_paths(root, paths, include, check_ignore=None):
     if include == FILTER_INCLUDE_ALL:
         pass
     elif include == FILTER_INCLUDE_SOME:
-        for (i, path) in enumerate(paths):
+        for i, path in enumerate(paths):
             if path in FILTER_PATHS_SOME:
                 items_to_delete.append(i)
     elif include in FILTER_INCLUDES_USING_GITIGNORE:
-        for (i, path) in enumerate(paths):
+        for i, path in enumerate(paths):
             abspath = os.path.abspath(os.path.join(root, path))
             if check_ignore is not None and check_ignore(abspath):
                 items_to_delete.append(i)
@@ -277,7 +277,7 @@ def _find_paths(path, include, sort=True):
         gitignore_path = os.path.join(os.path.abspath(path), GITIGNORE_BASENAME)
         if _file_exists(gitignore_path):
             check_ignore = gitignore_parser.parse_gitignore(gitignore_path)
-    for (root, dirs, files) in os.walk(path, topdown=True, followlinks=False):
+    for root, dirs, files in os.walk(path, topdown=True, followlinks=False):
         paths.extend(
             [
                 os.path.join(root, x)
@@ -310,6 +310,7 @@ def _run_with_piped_input(input_data, command, dry_run, show_trace):
         runcommand.print_trace(command, dry_run=dry_run)
     if dry_run:
         return 0
+    # pylint: disable=consider-using-with
     process = subprocess.Popen(command, universal_newlines=True, stdin=subprocess.PIPE)
     process.communicate(input=input_data)
     status = process.wait()
