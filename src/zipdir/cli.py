@@ -310,8 +310,7 @@ def _run_with_piped_input(input_data, command, dry_run, show_trace):
         runcommand.print_trace(command, dry_run=dry_run)
     if dry_run:
         return 0
-    # pylint: disable=consider-using-with
-    process = subprocess.Popen(command, universal_newlines=True, stdin=subprocess.PIPE)
+    process = subprocess.Popen(command, universal_newlines=True, stdin=subprocess.PIPE)  # noqa: S603
     process.communicate(input=input_data)
     status = process.wait()
     return status

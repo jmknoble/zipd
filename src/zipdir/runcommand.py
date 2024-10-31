@@ -16,6 +16,15 @@ def get_message_prefix(dry_run=False):
     return DRY_RUN_PREFIX if dry_run else WET_RUN_PREFIX
 
 
+def print_message(message, message_prefix=None, dry_run=False, msgfile=None):
+    """Print a message with optional prefix to the same location as traces."""
+    message_prefix = (
+        get_message_prefix(dry_run) if message_prefix is None else message_prefix
+    )
+    msgfile = sys.stderr if msgfile is None else msgfile
+    print("".join([message_prefix, message]), file=msgfile)
+
+
 def print_trace(
     args, message_prefix=None, trace_prefix=TRACE_PREFIX, dry_run=False, msgfile=None
 ):
@@ -37,11 +46,11 @@ def print_trace(
             (optional) If `message_prefix` is none, use a standard dry-run
             (`True`-ish) or wet-run (`False`-ish) message prefix
     """
-    message_prefix = (
-        get_message_prefix(dry_run) if message_prefix is None else message_prefix
+    trace_prefix = "" if trace_prefix is None else trace_prefix
+    message = "".join([trace_prefix, " ".join(args)])
+    print_message(
+        message, message_prefix=message_prefix, dry_run=dry_run, msgfile=msgfile
     )
-    msgfile = sys.stderr if msgfile is None else msgfile
-    print("".join([message_prefix, trace_prefix, " ".join(args)]), file=msgfile)
 
 
 def run_command(
@@ -53,7 +62,7 @@ def run_command(
     trace_prefix=TRACE_PREFIX,
     msgfile=None,
     # fmt: off
-    **kwargs
+    **kwargs,
     # fmt: on
 ):
     """
@@ -76,7 +85,7 @@ def run_command(
         return_output
             (optional) If `True`-ish, return the output from the command (uses
             `subprocess.check_output()`:py:meth: with
-            ``universal_newlines``=`True`)
+            ``universal_newlines=True``)
 
         show_trace
             (optional) If `True`-ish, print a trace of the command right before
@@ -93,7 +102,7 @@ def run_command(
     :Returns:
         - If `dry_run` is `True`, returns `None` if `return_output` is `True`,
           or 0 if `return_output` is `False`; otherwise,
-        - If `return_output` is `True, returns the result of
+        - If `return_output` is `True`, returns the result of
           `subprocess.check_output()`:py:meth:; otherwise,
         - If `check` is `True`, returns the result of
           `subprocess.check_call()`:py:meth:; otherwise,
@@ -104,20 +113,13 @@ def run_command(
         `subprocess.check_call()`:py:meth:, and `subprocess.call()`:py:meth:.
     """
     if dry_run:
-        msgfile = sys.stderr if msgfile is None else msgfile
-        print(
-            "{prefix}Would run the following command:".format(
-                prefix=get_message_prefix(dry_run)
-            ),
-            file=msgfile,
-        )
-
+        print_message("Would run:", dry_run=dry_run, msgfile=msgfile)
     if dry_run or show_trace:
         print_trace(args, trace_prefix=trace_prefix, dry_run=dry_run)
     if dry_run:
         return None if return_output else 0
     if return_output:
-        return subprocess.check_output(args, universal_newlines=True, **kwargs)
+        return subprocess.check_output(args, universal_newlines=True, **kwargs)  # noqa: S603
     if check:
-        return subprocess.check_call(args, **kwargs)
-    return subprocess.call(args, **kwargs)
+        return subprocess.check_call(args, **kwargs)  # noqa: S603
+    return subprocess.call(args, **kwargs)  # noqa: S603
