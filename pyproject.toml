@@ -1,6 +1,6 @@
 [project]
 name = "zipdir"
-version = "0.3.5"
+version = "0.3.6"
 description = "Recursively zip up a directory/folder"
 readme = "README.md"
 authors = [
@@ -100,7 +100,7 @@ max-statements = 60
 
 
 [tool.bumpver]
-current_version = "v0.3.5"
+current_version = "v0.3.6"
 version_pattern = "vMAJOR.MINOR.PATCH[PYTAGNUM]"
 commit_message = "bump version {old_version} -> {new_version}"
 tag_message = "{new_version}"
