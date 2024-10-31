@@ -1,9 +1,9 @@
 # zipdir
 
 [![EditorConfig-enabled](https://img.shields.io/badge/EditorConfig-enabled-brightgreen?logo=EditorConfig&logoColor=white)](https://editorconfig.org/)
-[![pre-commit-enabled](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-[![Python-3.6+](https://img.shields.io/badge/Python-3.6+-informational?logo=Python&logoColor=white)](https://www.python.org)
-[![CodeStyle-black](https://img.shields.io/badge/CodeStyle-black-informational)](https://github.com/psf/black)
+[![pre-commit-enabled](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com)
+[![Python-3.10+](https://img.shields.io/badge/Python-3.10+-informational?logo=Python&logoColor=white)](https://www.python.org)
+[![CodeStyle-ruff](https://img.shields.io/badge/CodeStyle-black-informational)](https://astral.sh/ruff)
 
 
 Convenience utility for recursively zipping up a directory (or "folder").
@@ -33,21 +33,20 @@ Convenience utility for recursively zipping up a directory (or "folder").
 
 ## Requirements
 
-- A [Python](https://www.python.org/) interpreter, version 3.6 or later
-- The Python packages listed in [requirements.txt][]
+- A [Python](https://www.python.org/) interpreter, version 3.10 or later
 - [zip][] installed somewhere on your path
 
 
 ## Installing
 
-1. Create and activate your Python virtual environment.
-2.  Install requirements via `pip`:
+It is recommended to install **zipdir** either:
 
-        pip install -r requirements.txt
+- In its own virtual environment (for example, using [uv][]), or
+- As a [pre-commit hook](#pre-commit-hook)
 
-3.  Install **zipdir** via `setup.py`:
+Once you have [uv installed][uv-install], you can use it to install `zipdir` as follows:
 
-        python setup.py install
+    uv tool install zipdir
 
 
 ## References
@@ -58,5 +57,4 @@ Convenience utility for recursively zipping up a directory (or "folder").
 
  [gitignore-parser]: https://github.com/mherrmann/gitignore_parser
  [python]: https://www.python.org/
- [requirements.txt]: requirements.txt
- [zip]: https://infozip.sourceforge.io/Zip.html
+ [zip]: https://infozip.sourceforge.net/Zip.html
