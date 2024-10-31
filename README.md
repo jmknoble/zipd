@@ -7,6 +7,7 @@
 
 
 Convenience utility for recursively zipping up a directory (or "folder").
+Formerly known as `zipdir`.
 
 
 [begintoc]: #
