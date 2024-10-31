@@ -1,4 +1,4 @@
-"""Command-line interface for zipdir."""
+"""Command-line interface for zipd."""
 
 from __future__ import absolute_import, print_function
 
@@ -10,7 +10,7 @@ import sys
 
 import gitignore_parser
 
-from zipdir import argparsing, get_version, runcommand
+from zipd import argparsing, get_version, runcommand
 
 DESCRIPTION_TEMPLATE = """
 Recursively zip up a directory/folder into a zipfile.

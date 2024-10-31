@@ -1,4 +1,4 @@
-# zipdir
+# zipd
 
 [![EditorConfig-enabled](https://img.shields.io/badge/EditorConfig-enabled-brightgreen?logo=EditorConfig&logoColor=white)](https://editorconfig.org/)
 [![pre-commit-enabled](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com)
@@ -39,14 +39,14 @@ Convenience utility for recursively zipping up a directory (or "folder").
 
 ## Installing
 
-It is recommended to install **zipdir** either:
+It is recommended to install **zipd** either:
 
 - In its own virtual environment (for example, using [uv][]), or
 - As a [pre-commit hook](#pre-commit-hook)
 
-Once you have [uv installed][uv-install], you can use it to install `zipdir` as follows:
+Once you have [uv installed][uv-install], you can use it to install `zipd` as follows:
 
-    uv tool install zipdir
+    uv tool install zipd
 
 
 ## References

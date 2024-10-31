@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import sys
 
-from zipdir import cli
+from zipd import cli
 
 __all__ = ["main"]
 
