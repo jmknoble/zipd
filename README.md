@@ -25,8 +25,8 @@ Formerly known as `zipdir`.
 ## Features
 
 - Can filter some revision control files out of resulting zipfile.
-- Can use `.gitignore` file for filtering.
-- Can zip up a git workspace including the `.git` folder.
+- Can use [.gitignore][] file for filtering.
+- Can zip up a [git][] workspace including the `.git` folder.
 - Can make a fresh zipfile or reuse an existing one.
 - Can pass options to **zip**.
 - Dry run.
@@ -40,22 +40,33 @@ Formerly known as `zipdir`.
 
 ## Installing
 
-It is recommended to install **zipd** either:
-
-- In its own virtual environment (for example, using [uv][]), or
-- As a [pre-commit hook](#pre-commit-hook)
+It is recommended to install **zipd** in its own virtual environment (for example, using [uv][]).
 
 Once you have [uv installed][uv-install], you can use it to install `zipd` as follows:
 
     uv tool install zipd
 
+Then:
+
+    uv tool run zipd --help
+
+or:
+
+    uvx zipd --help
+
 
 ## References
 
 - [zip][]
+- [git][] ([.gitignore][])
 - [gitignore-parser][]
+- [uv][] ([install][uv-install])
 
 
+ [git]: https://git-scm.com/
+ [.gitignore]: https://git-scm.com/docs/gitignore
  [gitignore-parser]: https://github.com/mherrmann/gitignore_parser
  [python]: https://www.python.org/
+ [uv]: https://github.com/astral-sh/uv
+ [uv-install]: https://docs.astral.sh/uv/getting-started/installation
  [zip]: https://infozip.sourceforge.net/Zip.html
