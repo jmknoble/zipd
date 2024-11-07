@@ -61,8 +61,8 @@ Make sure you can run `uv` when you're done:
 
 ### Development tools
 
-Tools you may need for development are generally listed as "development" dependencies in
-the `[tool.uv]` section of [pyproject.toml][].
+Tools you may need for development are generally listed as `dev` dependencies in the
+`[dependency-groups]` section of [pyproject.toml][].
 
 `uv` will automatically add those tools to the Python virtual environment it manages.
 
