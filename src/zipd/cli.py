@@ -27,6 +27,8 @@ from the zip archive:
     {prog} my-folder -- -D
 """
 
+STATUS_HELP = 42
+
 FILTER_INCLUDE_ALL = "all"
 FILTER_INCLUDE_SOME = "some"
 FILTER_INCLUDE_GITIGNORE = "gitignore"
@@ -393,6 +395,7 @@ def main(*argv):
 
     if args.folder is None or args.folder == "--":
         argparser.print_help()
+        return STATUS_HELP
 
     status = _do_zip(
         args.folder,
