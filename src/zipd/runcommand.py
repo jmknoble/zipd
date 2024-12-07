@@ -18,16 +18,12 @@ def get_message_prefix(dry_run=False):
 
 def print_message(message, message_prefix=None, dry_run=False, msgfile=None):
     """Print a message with optional prefix to the same location as traces."""
-    message_prefix = (
-        get_message_prefix(dry_run) if message_prefix is None else message_prefix
-    )
+    message_prefix = get_message_prefix(dry_run) if message_prefix is None else message_prefix
     msgfile = sys.stderr if msgfile is None else msgfile
     print("".join([message_prefix, message]), file=msgfile)
 
 
-def print_trace(
-    args, message_prefix=None, trace_prefix=TRACE_PREFIX, dry_run=False, msgfile=None
-):
+def print_trace(args, message_prefix=None, trace_prefix=TRACE_PREFIX, dry_run=False, msgfile=None):
     """
     Print a message tracing execution of a command.
 
@@ -48,9 +44,7 @@ def print_trace(
     """
     trace_prefix = "" if trace_prefix is None else trace_prefix
     message = "".join([trace_prefix, " ".join(args)])
-    print_message(
-        message, message_prefix=message_prefix, dry_run=dry_run, msgfile=msgfile
-    )
+    print_message(message, message_prefix=message_prefix, dry_run=dry_run, msgfile=msgfile)
 
 
 def run_command(

@@ -60,12 +60,7 @@ def _handle_root_dir(path, force):
     if force:
         zipfile_path = "".join(["ROOT_DIRECTORY", ZIP_SUFFIX])
     else:
-        raise RuntimeError(
-            (
-                "To zip up {path} and all its subdirectories, "
-                "use the '--force' option"
-            ).format(path=path)
-        )
+        raise RuntimeError("To zip up {path} and all its subdirectories, use the '--force' option".format(path=path))
     return zipfile_path
 
 
@@ -129,9 +124,9 @@ def _add_arguments(argparser):
         metavar="ZIPFILE",
         action="store",
         default=None,
-        help=(
-            "Store the resulting zip archive in ZIPFILE (default: {default})."
-        ).format(default=_infer_zipfile_path("FOLDER", force=False)),
+        help="Store the resulting zip archive in ZIPFILE (default: {default}).".format(
+            default=_infer_zipfile_path("FOLDER", force=False)
+        ),
     )
     group_zipfile.add_argument(
         "-f",
@@ -149,11 +144,7 @@ def _add_arguments(argparser):
         action="store_const",
         const=CREATE_METHOD_KEEP,
         default=CREATE_METHOD_DEFAULT,
-        help=(
-            "Keep and reuse a preexisting zipfile "
-            "(default: backup a preexisting zipfile "
-            "and create a fresh one)."
-        ),
+        help="Keep and reuse a preexisting zipfile (default: backup a preexisting zipfile and create a fresh one).",
     )
     mutex_group_create_method.add_argument(
         "--overwrite",
@@ -173,9 +164,7 @@ def _add_arguments(argparser):
         action="version",
         version="%(prog)s v{version}".format(version=get_version()),
     )
-    argparser.add_argument(
-        "folder", metavar="FOLDER", nargs="?", default=None, help="folder to zip up"
-    )
+    argparser.add_argument("folder", metavar="FOLDER", nargs="?", default=None, help="folder to zip up")
     argparser.add_argument(
         "more_options",
         metavar="...",
@@ -281,20 +270,10 @@ def _find_paths(path, include, sort=True):
             check_ignore = gitignore_parser.parse_gitignore(gitignore_path)
     for root, dirs, files in os.walk(path, topdown=True, followlinks=False):
         paths.extend(
-            [
-                os.path.join(root, x)
-                for x in _filter_paths(
-                    root, dirs, include=include, check_ignore=check_ignore
-                )
-            ]
+            [os.path.join(root, x) for x in _filter_paths(root, dirs, include=include, check_ignore=check_ignore)]
         )
         paths.extend(
-            [
-                os.path.join(root, x)
-                for x in _filter_paths(
-                    root, files, include=include, check_ignore=check_ignore
-                )
-            ]
+            [os.path.join(root, x) for x in _filter_paths(root, files, include=include, check_ignore=check_ignore)]
         )
     if sort:
         paths.sort()
@@ -346,9 +325,7 @@ def _do_zip(
             folder_path,
         ]
         zip_command.extend(more_options)
-        status = runcommand.run_command(
-            zip_command, check=False, dry_run=dry_run, show_trace=True
-        )
+        status = runcommand.run_command(zip_command, check=False, dry_run=dry_run, show_trace=True)
     else:
         zip_command = [
             ZIP_COMMAND,
@@ -359,9 +336,7 @@ def _do_zip(
 
         paths = _find_paths(folder_path, include)
 
-        status = _run_with_piped_input(
-            "\n".join(paths), zip_command, dry_run, show_trace=True
-        )
+        status = _run_with_piped_input("\n".join(paths), zip_command, dry_run, show_trace=True)
 
     return status
 
